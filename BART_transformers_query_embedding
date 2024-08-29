@@ -1,0 +1,21 @@
+from transformers import BartTokenizer, BartForConditionalGeneration
+import torch
+
+# Load BART model and tokenizer
+tokenizer = BartTokenizer.from_pretrained('facebook/bart-large-cnn')
+model = BartForConditionalGeneration.from_pretrained('facebook/bart-large-cnn')
+
+# Set model to evaluation mode (disables dropout)
+model.eval()
+
+# Encode the query using BART model
+query = "Which characters are in Antony and Cleopatra?"
+query_inputs = tokenizer(query, return_tensors='pt', truncation=True, max_length=1024)  # Adjust max_length if necessary
+with torch.no_grad():
+    query_outputs = model.model(**query_inputs)  # Use the underlying model for embeddings
+
+# Use mean pooling for the query embedding
+query_embedding = query_outputs.last_hidden_state.mean(dim=1).squeeze().numpy()
+
+# Print or use the query_embedding as needed
+print("Query embedding:", query_embedding)
